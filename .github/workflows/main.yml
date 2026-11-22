@@ -1,0 +1,40 @@
+
+name: AnimePlay Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-37" "build-tools;36.0.0" "platform-tools"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Build APK
+        working-directory: AnimePlay_0.1.6_BuildPrep_CI/AnimePlayApp
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Save APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AnimePlay-debug-apk
+          path: AnimePlay_0.1.6_BuildPrep_CI/AnimePlayApp/app/build/outputs/apk/debug/app-debug.apk
