@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+set -eu
+GRADLE_VERSION=9.6.0
+GRADLE_BASE="${HOME}/.gradle/animeplay"
+GRADLE_HOME="${GRADLE_BASE}/gradle-${GRADLE_VERSION}"
+GRADLE_ZIP="${TMPDIR:-/tmp}/animeplay-gradle-${GRADLE_VERSION}-bin.zip"
+GRADLE_URL="https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+GRADLE_SHA256="bbaeb2fef8710818cf0e261201dab964c572f92b942812df0c3620d62a529a01"
+
+if [ ! -x "${GRADLE_HOME}/bin/gradle" ]; then
+  echo "[AnimePlay] Downloading official Gradle ${GRADLE_VERSION}..."
+  if command -v curl >/dev/null 2>&1; then
+    curl -fL "${GRADLE_URL}" -o "${GRADLE_ZIP}"
+  else
+    wget -O "${GRADLE_ZIP}" "${GRADLE_URL}"
+  fi
+  if command -v sha256sum >/dev/null 2>&1; then
+    echo "${GRADLE_SHA256}  ${GRADLE_ZIP}" | sha256sum -c -
+  else
+    echo "sha256sum is required to verify the Gradle distribution."
+    exit 1
+  fi
+  mkdir -p "${GRADLE_BASE}"
+  unzip -q -o "${GRADLE_ZIP}" -d "${GRADLE_BASE}"
+  rm -f "${GRADLE_ZIP}"
+fi
+
+exec "${GRADLE_HOME}/bin/gradle" "$@"
